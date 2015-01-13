@@ -166,7 +166,7 @@ public class Robot extends SampleRobot {
     }
 
     /**
-     * Drive left & right motors for 2 seconds then stop
+     * Drive for 2 seconds then stop
      */
     public void autonomous() {
     	liftSensor.setAutomaticMode(true);
@@ -179,7 +179,7 @@ public class Robot extends SampleRobot {
     }
 
     /**
-     * Runs the motors with arcade steering.
+     * Tele-operation control period.
      */
     public void operatorControl() {
         chassis.setSafetyEnabled(true);
