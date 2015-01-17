@@ -4,103 +4,72 @@
  * and open the template in the editor.
  */
 
-package edu.wpi.first.wpilibj.templates;
+package org.usfirst.frc.team1672.robot;
 
 /**
- *
- * @author Jacob-Davis
+ 
+  @author Jacob Davis
+  @Git Jacob-Davis
  */
-public class LiftOperator extends RobotTemplate {
+public class LiftOperator extends Robot {
 	
-/*	public double desiredHeight; Not needed since I remembered to extend RobotTemplate
-	public double liftHeight;
-	public double GROUND_SENSOR_DISTANCE;
-	public double FIRST_SENSOR_DISTANCE;
-	public double SECOND_SENSOR_DISTANCE;
-	public double THIRD_SENSOR_DISTANCE;
-	public double FOURTH_SENSOR_DISTANCE;
-	public double FIFTH_SENSOR_DISTANCE;
-	
-	Ultrasonic liftSensor = new Ultrasonic(6, 6);
-	
-	Jaguar lift = new Jaguar(5); */
-	
-	/*if(liftStick.getRawButton(2)) {
-							liftHeight = liftSensor.getRangeInches();
-							if(liftHeight > FIRST_SENSOR_DISTANCE) {
-								while(liftHeight != FIRST_SENSOR_DISTANCE){
-									lift.set(-0.5); //Change this value to get the ground instance
-									liftHeight = liftSensor.getRangeInches();
-								}
-								lift.stopMotor();
-							}
-							if(liftHeight < FIRST_SENSOR_DISTANCE) {
-								while(liftHeight != FIRST_SENSOR_DISTANCE){
-									lift.set(0.5); //Change this value to get the ground instance
-									liftHeight = liftSensor.getRangeInches();
-								}
-								lift.stopMotor();
-							}
-							if(liftHeight == FIRST_SENSOR_DISTANCE) {
-								System.out.println("Already at this Height!");
-							}
-							lift.stopMotor(); */
  public void getLiftInput() {
 	 if(liftStick.getTrigger() || liftStick.getRawButton(2) || liftStick.getRawButton(3) || liftStick.getRawButton(4) || liftStick.getRawButton(5) || liftStick.getRawButton(10)) {
 						stopLoop = true;		
-						lift.stopMotor();
+						lift1.stopMotor();
+						lift2.stopMotor();
 	}
  }
  public void toGround() {
 						desiredHeight = GROUND_SENSOR_DISTANCE;
 						liftHeight = liftSensor.getRangeInches();
 						if(liftHeight > desiredHeight) {
-							lift.set(-0.5);
+							liftDriver.arcadeDrive(-0.5, -0.5);
 			}
   }
  public void toFirst() {
 						desiredHeight = FIRST_SENSOR_DISTANCE;
 						liftHeight = liftSensor.getRangeInches();
 						if(liftHeight < desiredHeight) {
-						lift.set(0.5);
+						liftDriver.arcadeDrive(0.5, 0.5);
 					} if(liftHeight > desiredHeight) {
-						lift.set(-0.5);
+						liftDriver.arcadeDrive(-0.5, -0.5);
 					}
  }
  public void toSecond() {
 						desiredHeight = SECOND_SENSOR_DISTANCE;
 						liftHeight = liftSensor.getRangeInches();
 						if(liftHeight < desiredHeight) {
-						lift.set(0.5);
+						liftDriver.arcadeDrive(0.5, 0.5);
 					} if(liftHeight > desiredHeight) {
-						lift.set(-0.5);
+						liftDriver.arcadeDrive(-0.5, -0.5);
 					}
  }
  public void toThird() {
 	 desiredHeight = THIRD_SENSOR_DISTANCE;
 						liftHeight = liftSensor.getRangeInches();
 						if(liftHeight < desiredHeight) {
-						lift.set(0.5);
+						liftDriver.arcadeDrive(0.5, 0.5);
 					} if(liftHeight > desiredHeight) {
-						lift.set(-0.5);
+						liftDriver.arcadeDrive(-0.5, -0.5);
 					}
  }
  public void toFourth() {
 						desiredHeight = FOURTH_SENSOR_DISTANCE;
 						liftHeight = liftSensor.getRangeInches();
 						if(liftHeight < desiredHeight) {
-						lift.set(0.5);
+						liftDriver.arcadeDrive(0.5, 0.5);
 					} if(liftHeight > desiredHeight) {
-						lift.set(-0.5);
+						liftDriver.arcadeDrive(-0.5, -0.5);
 					}
  }
  public void toFifth() {
 						desiredHeight = FIFTH_SENSOR_DISTANCE;
 						liftHeight = liftSensor.getRangeInches();
 						if(liftHeight < desiredHeight) {
-						lift.set(0.5);
+						liftDriver.arcadeDrive(0.5, 0.5);
 					} if(liftHeight > desiredHeight) {
-						lift.set(-0.5);
+						liftDriver.arcadeDrive(-0.5, -0.5);
 		}
 	}
 }
