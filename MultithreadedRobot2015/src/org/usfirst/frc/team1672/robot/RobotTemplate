@@ -5,20 +5,18 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package edu.wpi.first.wpilibj.templates;
+package org.usfirst.frc.team1672.robot;
 
-import edu.wpi.first.wpilibj.SimpleRobot;
+import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Ultrasonic;
-import edu.wpi.first.wpilibj.camera.AxisCamera;
+import edu.wpi.first.wpilibj.vision.AxisCamera;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.DriverStationLCD;
 import edu.wpi.first.wpilibj.Gyro;
 
 //import edu.wpi.first.wpilibj.buttons.JoystickButton; Not needed (using raw input)
@@ -31,7 +29,8 @@ import edu.wpi.first.wpilibj.Gyro;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class RobotTemplate extends SimpleRobot {
+public class Robot extends SampleRobot {
+	
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
@@ -39,28 +38,15 @@ public class RobotTemplate extends SimpleRobot {
 		 Joystick driveStick = new Joystick(0);
 		 Joystick liftStick = new Joystick(1);
 		 
-		 Servo cam1X = new Servo(7);
-		 Servo cam1Y = new Servo(8);
-		 
-		 public static Gyro roboGyro = new Gyro(9, 9);
+		 public static Gyro roboGyro = new Gyro(10);
 		 double robotDegrees = roboGyro.getAngle();
-		
-		 DriverStationLCD lcd = DriverStationLCD.getInstance(); //finds and accesses the lcd `on the driver station naming it lcd.
 		 
 		 SmartDashboard dash = new SmartDashboard();
 		 SendableChooser autoChooser = new SendableChooser();
 		 
-		 AxisCamera cam1 = AxisCamera.getInstance("10.16.72.2");
+		 AxisCamera cam1 = new AxisCamera("10.16.72.2");
 		 
-		 public static AxisCamera.ResolutionT k640x360;
-		 
-		// autoChooser.addDefault("default", 1);
-		 
-		 /*trigger is ground level each stage is a different set height for the containers to stack. Still needs calculations
-		 JoystickButton button2 = new JoystickButton(liftStick, 2);
-		 JoystickButton button3 = new JoystickButton(liftStick, 3);
-		 JoystickButton button4 = new JoystickButton(liftStick, 2);
-		 JoystickButton button5 = new JoystickButton(liftStick, 5); Not needed (using raw input) */
+		 public static AxisCamera.Resolution k640x360;
 	
 		 RobotDrive chassis = new RobotDrive(0, 1, 2, 3);
 		 
@@ -70,11 +56,12 @@ public class RobotTemplate extends SimpleRobot {
 		 Talon rearRight = new Talon(3);
 		 
 		 LiftOperator lifter = new LiftOperator();
+		 AutoLibrary autoLib = new AutoLibrary();
 		 
-		 RobotDrive liftDriver = new RobotDrive(5,11);
+		 RobotDrive liftDriver = new RobotDrive(5,6);
 		 
-		 Jaguar lift = new Jaguar(5);
-		 Jaguar test = new Jaguar(11);
+		 Jaguar lift1 = new Jaguar(5);
+		 Jaguar lift2 = new Jaguar(6);
 		 
 		 public final double GROUND_SENSOR_DISTANCE = 0.1; //ground level
 		 public final double FIRST_SENSOR_DISTANCE = 12.1; //1st level
@@ -83,22 +70,45 @@ public class RobotTemplate extends SimpleRobot {
 		 public final double FOURTH_SENSOR_DISTANCE = 48.4; //4th level
 		 public final double FIFTH_SENSOR_DISTANCE = 56; //5th level (container)
 		 
-		 Ultrasonic liftSensor = new Ultrasonic(6, 6);
+		 Ultrasonic liftSensor = new Ultrasonic(7, 7);
 		 public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
 		 public static double desiredHeight;
 		 
 		 boolean isLiftReady = false;
 		 boolean stopLoop = false;
+		 
+		 public void robotInit() {
+		    	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+		    	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+		    	
+				liftSensor.setAutomaticMode(true);
+				liftSensor.setEnabled(true);
+				
+				liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+				
+				autoChooser.addDefault("Right", new Thread("auto1"));
+				autoChooser.addObject("Middle", new Thread("auto2"));
+				autoChooser.addObject("Left", new Thread("auto3"));
+				SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
+		 }
+		 
+		 String chosenAuto;
+		 
+		 public void autonomousInit() {
+			 chosenAuto = (String) autoChooser.getSelected();
+		 }
 	
     public void autonomous() {
-				lcd.println(DriverStationLCD.Line.kUser6, 1, "Robot now in Autonomous mode!");
-	      lcd.updateLCD();
-				//first number is x drive speed, 2nd is y drive speed, 3rd is rotation speed, 4th is the angle of rotation
-				chassis.mecanumDrive_Cartesian(liftHeight, liftHeight, liftHeight, liftHeight);
-        chassis.setSafetyEnabled(false);
-        chassis.mecanumDrive_Polar(0.5, 0.0, 0.0);
-        Timer.delay(2.0);
-        chassis.mecanumDrive_Polar(0.0, 0.0, 0.0);
+    	
+    	chassis.setSafetyEnabled(false);
+    	
+    	if(chosenAuto.equals("auto1")) {
+    		autoLib.runAuto1();
+    	} else if(chosenAuto.equals("auto2")) {
+    		autoLib.runAuto2();
+    	} else {
+    		autoLib.runAuto3();
+    	}
     }
 
     /**
@@ -107,10 +117,7 @@ public class RobotTemplate extends SimpleRobot {
     public void operatorControl() {
 			liftSensor.setAutomaticMode(true);
 			liftSensor.setEnabled(true);
-			
-			lcd.println(DriverStationLCD.Line.kUser6, 1, "Robot now in TeleOp mode!");
-	    lcd.updateLCD();
-			
+
 			Thread driveThread = new Thread() {
 				public void start() {
 				}
@@ -118,6 +125,7 @@ public class RobotTemplate extends SimpleRobot {
 					chassis.mecanumDrive_Polar(driveStick.getMagnitude(), driveStick.getDirectionDegrees(), driveStick.getTwist());
 				}
 			};
+			
 			Thread liftThread = new Thread() {
 				private Joystick liftStick;
 				public void start(){
@@ -179,7 +187,7 @@ public class RobotTemplate extends SimpleRobot {
 				public void start() {
 					}
 					public void run() {
-						liftDriver.arcadeDrive(liftStick.getY(), liftStick.getX());
+						liftDriver.arcadeDrive(liftStick.getY(), liftStick.getY());
 				}
 			};
 		
@@ -190,24 +198,16 @@ public class RobotTemplate extends SimpleRobot {
 							liftAxisThread.start();
 					}
 				}
-						
-						
+										
   /**
      * This function is called once each time the robot enters test mode.
     */
     public void test() {
 			
-			lcd.println(DriverStationLCD.Line.kUser6, 1, "Robot now in Test mode!");
-	    lcd.updateLCD();
-			
-				liftSensor.setAutomaticMode(true);
-				liftSensor.setEnabled(true);
 				double testHeight;
 				while (isTest() && isEnabled()) {
 					testHeight = liftSensor.getRangeInches();
 					System.out.println(testHeight + " inches");
-					lcd.println(DriverStationLCD.Line.kUser6, 1, testHeight + " inches");
-				  lcd.updateLCD();
 		}
 	}
 }
