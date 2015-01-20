@@ -56,36 +56,11 @@ public class Robot extends SampleRobot {
 		 Talon rearRight = new Talon(3);
 		 
 		 /*
-		  *To Jacob, in advance:
-		  *------------------------------------------------------------------------
-		  * I'm fucking with this code because THE OLD CODE HAD NO POSSIBILITY OF EVER WORKING.
-		  * If you EXTEND a class, that doesn't mean the extended class magically has access
-		  * to the superclass's variables. It means that the extended class gets COPIES
-		  * of the superclass's variables. Please please make sure you thoroughly understand
-		  * the things you code before you commit them. 
-		  * Furthermore, when you extended LiftOperator, it made a copy of ITSELF (because
-		  * Robot contained a LiftOperator object), which by the definition of LiftOperator
-		  * made another copy of itself, and another, and another, and effectively
-		  * included itself INFINITE times...
-		  * All of this is why we got that "error instantiating robot" thing when
-		  * trying to load this code onto the robot.
-		  * 
-		  * I'm making LiftOperator a member class (nested class) of Robot so that
-		  * it gets direct access to Robot's private variables without all the above
-		  * problems.
-		  * We talked about this before,
-		  * and I even changed the code on the Robotics laptop to make all these edits.
-		  * Maybe you forgot, or maybe you switched to your desktop computer
-		  * without checking the robotics laptop for edits first? If it's the second one,
-		  * I apologize for not pushing to git first.
-		  * 
-		  * 
-		  * 
-		  * We are having some serious miscommunication right now. Talk to me on Tuesday. 
-		  * Obviously you don't have to consult
-		  * with me every time you commit an edit, but please send me a message notifying me that
-		  * you have done so. Thanks,
-		  * 
+		  *Do NOT extend LiftOperator from Robot. This creates an infinite inclusion loop
+		  * where LiftOperator includes itself from Robot, which includes itself again, and again,
+		  * etc. Also, extending classes does not give them access to the base class's
+		  * variables. It gives them COPIES of the base class variables.
+		  * I've made LiftOperator a member class of Robot, which gives the same functionality.
 		  * ~Andrew, 1/19/2015
 		  */
 		 class LiftOperator
