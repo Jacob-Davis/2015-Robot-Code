@@ -43,6 +43,7 @@ public class Robot extends SampleRobot {
 		 
 		 SmartDashboard dash = new SmartDashboard();
 		 SendableChooser autoChooser = new SendableChooser();
+		 String chosenAuto;
 		 
 		 AxisCamera cam1 = new AxisCamera("10.16.72.2");
 		 
@@ -162,30 +163,45 @@ public class Robot extends SampleRobot {
 				
 				liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
 				
-				autoChooser.addDefault("Right", new Thread("auto1"));
-				autoChooser.addObject("Middle", new Thread("auto2"));
-				autoChooser.addObject("Left", new Thread("auto3"));
+				autoChooser.addDefault("Right", "autoRight");
+				autoChooser.addObject("Middle", "autoMiddle");
+				autoChooser.addObject("Left", "autoLeft");
 				SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
 		 }
 		 
-		 String chosenAuto;
 		 
-		 public void autonomousInit() {
-			 chosenAuto = (String) autoChooser.getSelected();
-		 }
+	 
+	 //SampleRobot does not support an autonomousInit() method -
+	 //this method is used by IterativeRobot only.
+	//I've put this code at the beginning of autonomous(), which does the same thing
+	 /*public void autonomousInit() {
+		 
+		 chosenAuto = (String) autoChooser.getSelected();
+	 }*/
 	
     public void autonomous() {
-    	
+    	chosenAuto = (String) autoChooser.getSelected();
     	chassis.setSafetyEnabled(false);
     	
-    	if(chosenAuto.equals("auto1")) {
-    		autoLib.runAuto1();
-    	} else if(chosenAuto.equals("auto2")) {
-    		autoLib.runAuto2();
-    	} else {
-    		autoLib.runAuto3();
+    	switch(chosenAuto)
+    	{
+	    	case("autoRight"):
+	    	{
+	    		autoLib.runAutoRight();
+	    		break;
+	    	}
+	    	case("autoMiddle"):
+	    	{
+	    		autoLib.runAutoMiddle();
+	    		break;
+	    	}
+	    	default:
+	    	{
+	    		autoLib.runAutoLeft();
+	    		break;
+	    	}
     	}
-    }
+    }//<---end autonomous() method
 
     /**
      * This function is called once each time the robot enters operator control.
