@@ -29,11 +29,18 @@ import edu.wpi.first.wpilibj.Gyro;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends SampleRobot {
+public class Robot extends SampleRobot implements LiftInterface {
 	
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
+	
+	
+		/*
+		 * I just put ALL of the lift's function into a separate file. This cleans
+		 * up the code a little bit. ~Andrew 1/21/15
+		 */
+		LiftThread lift;
 	
 		 Joystick driveStick = new Joystick(0);
 		 Joystick liftStick = new Joystick(1);
@@ -56,89 +63,19 @@ public class Robot extends SampleRobot {
 		 Talon rearLeft = new Talon(2);
 		 Talon rearRight = new Talon(3);
 		 
-		 /*
-		  *Do NOT extend LiftOperator from Robot. This creates an infinite inclusion loop
-		  * where LiftOperator includes itself from Robot, which includes itself again, and again,
-		  * etc. Also, extending classes does not give them access to the base class's
-		  * variables. It gives them COPIES of the base class variables.
-		  * I've made LiftOperator a member class of Robot, which gives the same functionality.
-		  * ~Andrew, 1/19/2015
-		  */
-		 class LiftOperator
-		 {
-			 public void getLiftInput() {
-				 if(liftStick.getTrigger() || liftStick.getRawButton(2) || liftStick.getRawButton(3) || liftStick.getRawButton(4) || liftStick.getRawButton(5) || liftStick.getRawButton(10)) {
-					stopLoop = true;		
-					lift1.stopMotor();
-					lift2.stopMotor();
-				}
-			 }
-			 public void toGround() {
-				desiredHeight = GROUND_SENSOR_DISTANCE;
-				liftHeight = liftSensor.getRangeInches();
-				if(liftHeight > desiredHeight) {
-					liftDriver.arcadeDrive(-0.5, -0.5);
-				}
-			  }
-			 public void toFirst() {
-				desiredHeight = FIRST_SENSOR_DISTANCE;
-				liftHeight = liftSensor.getRangeInches();
-				if(liftHeight < desiredHeight) {
-				liftDriver.arcadeDrive(0.5, 0.5);
-				} 
-				if(liftHeight > desiredHeight) {
-				liftDriver.arcadeDrive(-0.5, -0.5);
-				}
-			 }
-			 public void toSecond() {
-				desiredHeight = SECOND_SENSOR_DISTANCE;
-				liftHeight = liftSensor.getRangeInches();
-				if(liftHeight < desiredHeight) {
-				liftDriver.arcadeDrive(0.5, 0.5);
-				} 
-				if(liftHeight > desiredHeight) {
-				liftDriver.arcadeDrive(-0.5, -0.5);
-				}
-			 }
-			 public void toThird() {
-				desiredHeight = THIRD_SENSOR_DISTANCE;
-				liftHeight = liftSensor.getRangeInches();
-				if(liftHeight < desiredHeight) {
-				liftDriver.arcadeDrive(0.5, 0.5);
-				} 
-				if(liftHeight > desiredHeight) {
-				liftDriver.arcadeDrive(-0.5, -0.5);
-				}
-			 }
-			 public void toFourth() {
-				desiredHeight = FOURTH_SENSOR_DISTANCE;
-				liftHeight = liftSensor.getRangeInches();
-				if(liftHeight < desiredHeight) {
-				liftDriver.arcadeDrive(0.5, 0.5);
-				} 
-				if(liftHeight > desiredHeight) {
-				liftDriver.arcadeDrive(-0.5, -0.5);
-				}
-			 }
-			 public void toFifth() {
-				desiredHeight = FIFTH_SENSOR_DISTANCE;
-				liftHeight = liftSensor.getRangeInches();
-				if(liftHeight < desiredHeight) {
-				liftDriver.arcadeDrive(0.5, 0.5);
-				} 
-				if(liftHeight > desiredHeight) {
-				liftDriver.arcadeDrive(-0.5, -0.5);
-				}
-			}
-		 }
 		 
-		 LiftOperator lifter = new LiftOperator();
 		 AutoLibrary autoLib = new AutoLibrary();
 		 
 		 RobotDrive liftDriver = new RobotDrive(5,6);
 		 
 		 Jaguar lift1 = new Jaguar(5);
 		 Jaguar lift2 = new Jaguar(6);
+		 
+		 public final int BTN_LIFT_ONE = 2;
+		 public final int BTN_LIFT_TWO = 3;
+		 public final int BTN_LIFT_THREE = 4;
+		 public final int BTN_LIFT_FOUR = 5;
+		 public final int BTN_LIFT_FIVE = 10;
 		 
 		 public final double GROUND_SENSOR_DISTANCE = 0.1; //ground level
 		 public final double FIRST_SENSOR_DISTANCE = 12.1; //1st level
@@ -153,20 +90,24 @@ public class Robot extends SampleRobot {
 		 
 		 boolean isLiftReady = false;
 		 boolean stopLoop = false;
+		 boolean inputDetected = false;
 		 
 		 public void robotInit() {
-		    	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-		    	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
-		    	
-				liftSensor.setAutomaticMode(true);
-				liftSensor.setEnabled(true);
-				
-				liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-				
-				autoChooser.addDefault("Right", "autoRight");
-				autoChooser.addObject("Middle", "autoMiddle");
-				autoChooser.addObject("Left", "autoLeft");
-				SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
+			lift = new LiftThread();
+			lift.robot = this;
+			 
+	    	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+	    	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+	    	
+			liftSensor.setAutomaticMode(true);
+			liftSensor.setEnabled(true);
+			
+			liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+			
+			autoChooser.addDefault("Right", "autoRight");
+			autoChooser.addObject("Middle", "autoMiddle");
+			autoChooser.addObject("Left", "autoLeft");
+			SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
 		 }
 		 
 		 
@@ -223,66 +164,7 @@ public class Robot extends SampleRobot {
 			}
 		};
 		
-		Thread liftThread = new Thread() {
-			private Joystick liftStick;
-			public void start(){
-				liftStick = new Joystick(1);
-			}
-			public void run() {
-				while(isOperatorControl() && isEnabled())
-				{
-					if(liftStick.getTrigger()){
-						lifter.toGround();
-						while(liftHeight >= (desiredHeight + 2) || liftHeight <= (desiredHeight - 2) && stopLoop == false) {
-								lifter.toGround();
-								lifter.getLiftInput();
-							}
-						stopLoop = false;
-						}
-					if(liftStick.getRawButton(2)) {
-						lifter.toFirst();
-						while(liftHeight >= (desiredHeight + 2) || liftHeight <= (desiredHeight - 2) && stopLoop == false) {
-								lifter.toFirst();
-								lifter.getLiftInput();
-							}
-						stopLoop = false;
-						}
-						if(liftStick.getRawButton(3)) {
-						lifter.toSecond();
-						while(liftHeight >= (desiredHeight + 2) || liftHeight <= (desiredHeight - 2) && stopLoop == false) {
-								lifter.toSecond();
-								lifter.getLiftInput();
-							}
-						stopLoop = false;
-						}
-						if(liftStick.getRawButton(4)) {
-						lifter.toThird();
-						while(liftHeight >= (desiredHeight + 2) || liftHeight <= (desiredHeight - 2) && stopLoop == false) {
-								lifter.toThird();
-								lifter.getLiftInput();
-							}
-						stopLoop = false;
-						}
-						if(liftStick.getRawButton(5)) {
-						lifter.toFourth();
-						while(liftHeight >= (desiredHeight + 2) || liftHeight <= (desiredHeight - 2) && stopLoop == false) {
-								lifter.toFourth();
-								lifter.getLiftInput();
-							}
-						stopLoop = false;
-						}
-						if(liftStick.getRawButton(10)) {
-						lifter.toFifth();
-						while(liftHeight >= (desiredHeight + 2) || liftHeight <= (desiredHeight - 2) && stopLoop == false) {
-								lifter.toFifth();
-								lifter.getLiftInput();
-							}
-						stopLoop = false;
-						}
-				}
-				
-			} //<--end run method
-		};
+		
 		
 		Thread liftAxisThread = new Thread() {
 			public void start() {
@@ -296,7 +178,7 @@ public class Robot extends SampleRobot {
 		};
 	
 		driveThread.start();
-		liftThread.start();
+		lift.start();
 		liftAxisThread.start();
 		chassis.setSafetyEnabled(true);
 			
@@ -313,7 +195,7 @@ public class Robot extends SampleRobot {
         	 * ~Andrew, 1/19/2013
         	 */
         	driveThread.join();
-        	liftThread.join();
+        	lift.join();
         	liftAxisThread.join();
         }
         catch(InterruptedException ie)
@@ -326,11 +208,58 @@ public class Robot extends SampleRobot {
      * This function is called once each time the robot enters test mode.
     */
     public void test() {
-			
-				double testHeight;
-				while (isTest() && isEnabled()) {
-					testHeight = liftSensor.getRangeInches();
-					System.out.println(testHeight + " inches");
+		double testHeight;
+		while (isTest() && isEnabled()) {
+			testHeight = liftSensor.getRangeInches();
+			System.out.println(testHeight + " inches");
 		}
 	}
+    public double getDesiredHeight()
+    {
+    	if(liftStick.getTrigger())
+		{
+			desiredHeight = GROUND_SENSOR_DISTANCE;
+		}
+		if(liftStick.getRawButton(BTN_LIFT_ONE))
+		{
+			desiredHeight = FIRST_SENSOR_DISTANCE;
+		}
+		if(liftStick.getRawButton(BTN_LIFT_TWO))
+		{
+			desiredHeight = SECOND_SENSOR_DISTANCE;
+		}
+		if(liftStick.getRawButton(BTN_LIFT_THREE))
+		{
+			desiredHeight = THIRD_SENSOR_DISTANCE;
+		}
+		if(liftStick.getRawButton(BTN_LIFT_FOUR))
+		{
+			desiredHeight = FOURTH_SENSOR_DISTANCE;
+		}
+		if(liftStick.getRawButton(BTN_LIFT_FIVE))
+		{
+			desiredHeight = FIFTH_SENSOR_DISTANCE;
+		}
+    	return desiredHeight;
+    }
+    public void liftUp()
+    {
+    	liftDriver.arcadeDrive(0.5, 0.5);
+    }
+    public void liftDown()
+    {
+    	liftDriver.arcadeDrive(-0.5, -0.5);
+    }
+    public void liftStop()
+    {
+    	liftDriver.arcadeDrive(0.0, 0.0);
+    }
+    public double getLiftHeight()
+    {
+    	return liftSensor.getRangeInches();
+    }
+    
+   
 }
+
+
