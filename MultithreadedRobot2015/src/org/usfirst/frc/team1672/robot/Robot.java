@@ -31,84 +31,84 @@ import edu.wpi.first.wpilibj.Gyro;
  */
 public class Robot extends SampleRobot implements LiftInterface {
 	
+	
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
 	
 	
-		/*
-		 * I just put ALL of the lift's function into a separate file. This cleans
-		 * up the code a little bit. ~Andrew 1/21/15
-		 */
-		LiftThread lift;
+	/*
+	 * I just put ALL of the lift's function into a separate file. This cleans
+	 * up the code a little bit. ~Andrew 1/21/15
+	 */
+	LiftThread lift;
 	
-		 Joystick driveStick = new Joystick(0);
-		 Joystick liftStick = new Joystick(1);
+	Joystick driveStick = new Joystick(0);
+	Joystick liftStick = new Joystick(1);
+	 
+	public static Gyro roboGyro = new Gyro(10);
+	double robotDegrees = roboGyro.getAngle();
+	 
+	SmartDashboard dash = new SmartDashboard();
+	SendableChooser autoChooser = new SendableChooser();
+	String chosenAuto;
+	 
+	AxisCamera cam1 = new AxisCamera("10.16.72.2");
+	public static AxisCamera.Resolution k640x360;
+
+	RobotDrive chassis = new RobotDrive(0, 1, 2, 3);
+	 
+	Talon frontLeft = new Talon(0);
+	Talon frontRight = new Talon(1);
+	Talon rearLeft = new Talon(2);
+	Talon rearRight = new Talon(3);
+	 
+	 
+	AutoLibrary autoLib = new AutoLibrary();
+	 
+	RobotDrive liftDriver = new RobotDrive(5,6);
+	 
+	Jaguar lift1 = new Jaguar(5);
+	Jaguar lift2 = new Jaguar(6);
+	 
+	public final int BTN_LIFT_ONE = 2;
+	public final int BTN_LIFT_TWO = 3;
+	public final int BTN_LIFT_THREE = 4;
+	public final int BTN_LIFT_FOUR = 5;
+	public final int BTN_LIFT_FIVE = 10;
+	 
+	public final double GROUND_SENSOR_DISTANCE = 0.1; //ground level
+	public final double FIRST_SENSOR_DISTANCE = 12.1; //1st level
+	public final double SECOND_SENSOR_DISTANCE = 24.2; //2nd level
+	public final double THIRD_SENSOR_DISTANCE = 36.3; //3rd level
+	public final double FOURTH_SENSOR_DISTANCE = 48.4; //4th level
+	public final double FIFTH_SENSOR_DISTANCE = 56; //5th level (container)
+	 
+	Ultrasonic liftSensor = new Ultrasonic(7, 7);
+	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
+	public static double desiredHeight;
+	 
+	boolean isLiftReady = false;
+	boolean stopLoop = false;
+	boolean inputDetected = false;
+	 
+	public void robotInit() {
+		lift = new LiftThread();
+		lift.robot = this;
 		 
-		 public static Gyro roboGyro = new Gyro(10);
-		 double robotDegrees = roboGyro.getAngle();
-		 
-		 SmartDashboard dash = new SmartDashboard();
-		 SendableChooser autoChooser = new SendableChooser();
-		 String chosenAuto;
-		 
-		 AxisCamera cam1 = new AxisCamera("10.16.72.2");
-		 
-		 public static AxisCamera.Resolution k640x360;
-	
-		 RobotDrive chassis = new RobotDrive(0, 1, 2, 3);
-		 
-		 Talon frontLeft = new Talon(0);
-		 Talon frontRight = new Talon(1);
-		 Talon rearLeft = new Talon(2);
-		 Talon rearRight = new Talon(3);
-		 
-		 
-		 AutoLibrary autoLib = new AutoLibrary();
-		 
-		 RobotDrive liftDriver = new RobotDrive(5,6);
-		 
-		 Jaguar lift1 = new Jaguar(5);
-		 Jaguar lift2 = new Jaguar(6);
-		 
-		 public final int BTN_LIFT_ONE = 2;
-		 public final int BTN_LIFT_TWO = 3;
-		 public final int BTN_LIFT_THREE = 4;
-		 public final int BTN_LIFT_FOUR = 5;
-		 public final int BTN_LIFT_FIVE = 10;
-		 
-		 public final double GROUND_SENSOR_DISTANCE = 0.1; //ground level
-		 public final double FIRST_SENSOR_DISTANCE = 12.1; //1st level
-		 public final double SECOND_SENSOR_DISTANCE = 24.2; //2nd level
-		 public final double THIRD_SENSOR_DISTANCE = 36.3; //3rd level
-		 public final double FOURTH_SENSOR_DISTANCE = 48.4; //4th level
-		 public final double FIFTH_SENSOR_DISTANCE = 56; //5th level (container)
-		 
-		 Ultrasonic liftSensor = new Ultrasonic(7, 7);
-		 public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
-		 public static double desiredHeight;
-		 
-		 boolean isLiftReady = false;
-		 boolean stopLoop = false;
-		 boolean inputDetected = false;
-		 
-		 public void robotInit() {
-			lift = new LiftThread();
-			lift.robot = this;
-			 
-	    	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-	    	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
-	    	
-			liftSensor.setAutomaticMode(true);
-			liftSensor.setEnabled(true);
-			
-			liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-			
-			autoChooser.addDefault("Right", "autoRight");
-			autoChooser.addObject("Middle", "autoMiddle");
-			autoChooser.addObject("Left", "autoLeft");
-			SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
-		 }
+    	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+    	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+    	
+		liftSensor.setAutomaticMode(true);
+		liftSensor.setEnabled(true);
+		
+		liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+		
+		autoChooser.addDefault("Right", "autoRight");
+		autoChooser.addObject("Middle", "autoMiddle");
+		autoChooser.addObject("Left", "autoLeft");
+		SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
+	 }
 		 
 		 
 	 
@@ -163,23 +163,9 @@ public class Robot extends SampleRobot implements LiftInterface {
 				
 			}
 		};
-		
-		
-		
-		Thread liftAxisThread = new Thread() {
-			public void start() {
-				}
-				public void run() {
-					while(isOperatorControl() && isEnabled())
-					{
-						liftDriver.arcadeDrive(liftStick.getY(), liftStick.getY());
-					}
-			}
-		};
 	
 		driveThread.start();
 		lift.start();
-		liftAxisThread.start();
 		chassis.setSafetyEnabled(true);
 			
 		
@@ -196,7 +182,6 @@ public class Robot extends SampleRobot implements LiftInterface {
         	 */
         	driveThread.join();
         	lift.join();
-        	liftAxisThread.join();
         }
         catch(InterruptedException ie)
         {
@@ -214,7 +199,9 @@ public class Robot extends SampleRobot implements LiftInterface {
 			System.out.println(testHeight + " inches");
 		}
 	}
-    public double getDesiredHeight()
+    
+    //----------interface methods---------------------------------//
+    public double getInputHeight()
     {
     	if(liftStick.getTrigger())
 		{
@@ -254,11 +241,18 @@ public class Robot extends SampleRobot implements LiftInterface {
     {
     	liftDriver.arcadeDrive(0.0, 0.0);
     }
+    public void liftManualControl()
+    {
+    	liftDriver.arcadeDrive(liftStick.getY(), liftStick.getY());
+    }
     public double getLiftHeight()
     {
     	return liftSensor.getRangeInches();
     }
-    
+    public boolean operatorIsEnabled()
+    {
+    	return isEnabled() && isOperatorControl();
+    }
    
 }
 
