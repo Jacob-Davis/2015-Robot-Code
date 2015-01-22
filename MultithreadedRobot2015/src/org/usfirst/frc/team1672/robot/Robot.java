@@ -30,17 +30,12 @@ import edu.wpi.first.wpilibj.Gyro;
  * directory.
  */
 public class Robot extends SampleRobot implements LiftInterface {
-	
-	
-    /**
-     * This function is called once each time the robot enters autonomous mode.
-     */
-	
-	
 	/*
 	 * I just put ALL of the lift's function into a separate file. This cleans
 	 * up the code a little bit. ~Andrew 1/21/15
 	 */
+	
+	
 	LiftThread lift;
 	
 	Joystick driveStick = new Joystick(0);
@@ -49,27 +44,36 @@ public class Robot extends SampleRobot implements LiftInterface {
 	public static Gyro roboGyro = new Gyro(10);
 	double robotDegrees = roboGyro.getAngle();
 	 
+	AutoLibrary autoLib = new AutoLibrary();
 	SmartDashboard dash = new SmartDashboard();
 	SendableChooser autoChooser = new SendableChooser();
 	String chosenAuto;
 	 
 	AxisCamera cam1 = new AxisCamera("10.16.72.2");
 	public static AxisCamera.Resolution k640x360;
+	
+	private final int PORT_FL = 0;
+	private final int PORT_FR = 1;
+	private final int PORT_RL = 2;
+	private final int PORT_RR = 3;
+	private final int PORT_LIFT1 = 4;
+	private final int PORT_LIFT2 = 5;
+	private final int PORT_USONIC = 7;
 
-	RobotDrive chassis = new RobotDrive(0, 1, 2, 3);
+	RobotDrive chassis = new RobotDrive(PORT_FL, PORT_FR, PORT_RL, PORT_RR);
 	 
-	Talon frontLeft = new Talon(0);
-	Talon frontRight = new Talon(1);
-	Talon rearLeft = new Talon(2);
-	Talon rearRight = new Talon(3);
-	 
-	 
-	AutoLibrary autoLib = new AutoLibrary();
-	 
-	RobotDrive liftDriver = new RobotDrive(5,6);
-	 
-	Jaguar lift1 = new Jaguar(5);
-	Jaguar lift2 = new Jaguar(6);
+	Talon frontLeft = new Talon(PORT_FL);
+	Talon frontRight = new Talon(PORT_FR);
+	Talon rearLeft = new Talon(PORT_RL);
+	Talon rearRight = new Talon(PORT_RR);
+	
+	RobotDrive liftDriver = new RobotDrive(PORT_LIFT1,PORT_LIFT2);
+	Jaguar lift1 = new Jaguar(PORT_LIFT1);
+	Jaguar lift2 = new Jaguar(PORT_LIFT2);
+	
+	Ultrasonic liftSensor = new Ultrasonic(PORT_USONIC, PORT_USONIC);
+	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
+	public static double desiredHeight;
 	 
 	public final int BTN_LIFT_ONE = 2;
 	public final int BTN_LIFT_TWO = 3;
@@ -83,10 +87,6 @@ public class Robot extends SampleRobot implements LiftInterface {
 	public final double THIRD_SENSOR_DISTANCE = 36.3; //3rd level
 	public final double FOURTH_SENSOR_DISTANCE = 48.4; //4th level
 	public final double FIFTH_SENSOR_DISTANCE = 56; //5th level (container)
-	 
-	Ultrasonic liftSensor = new Ultrasonic(7, 7);
-	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
-	public static double desiredHeight;
 	 
 	boolean isLiftReady = false;
 	boolean stopLoop = false;
@@ -109,16 +109,6 @@ public class Robot extends SampleRobot implements LiftInterface {
 		autoChooser.addObject("Left", "autoLeft");
 		SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
 	 }
-		 
-		 
-	 
-	 //SampleRobot does not support an autonomousInit() method -
-	 //this method is used by IterativeRobot only.
-	//I've put this code at the beginning of autonomous(), which does the same thing
-	 /*public void autonomousInit() {
-		 
-		 chosenAuto = (String) autoChooser.getSelected();
-	 }*/
 	
     public void autonomous() {
     	chosenAuto = (String) autoChooser.getSelected();
