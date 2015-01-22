@@ -5,7 +5,7 @@ RoboRIO 2015. Hello whoever this may concern.
 
 This is the 2015 Team 1672 FRC Robot Code. This code was authored by Andrew Chan (theandrewchan) and Jacob Davis (Jacob-Davis).
 
-For this code, we have created a mecanum drive. This is for mecanum wheels. If these are going to be used, they need to be arranged in an "x" pattern with the angles facing towards the center of the robot. Also, the lift is monitored using an ultrasonic sensor. This code is used to set the lift to estimated heights determined by the heights of the totes and the containers.
+For this code, we have created a mecanum drive. This is for mecanum wheels. The lift is monitored using an ultrasonic sensor. This code is used to set the lift to estimated heights determined by the heights of the totes and the containers.
 
 To run this code...
 
