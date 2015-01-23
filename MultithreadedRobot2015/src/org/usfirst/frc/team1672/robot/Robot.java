@@ -67,9 +67,8 @@ public class Robot extends SampleRobot implements LiftInterface {
 	Talon rearLeft = new Talon(PORT_FR);
 	Talon rearRight = new Talon(PORT_RR);
 	
-	RobotDrive liftDriver = new RobotDrive(PORT_LIFT1,PORT_LIFT2);
 	Jaguar lift1 = new Jaguar(PORT_LIFT1);
-	Jaguar lift2 = new Jaguar(PORT_LIFT2);
+	Jaguar lift2 = new Jaguar(PORT_LIFT1);
 	
 	Ultrasonic liftSensor = new Ultrasonic(PORT_USONIC, PORT_USONIC);
 	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
@@ -221,19 +220,19 @@ public class Robot extends SampleRobot implements LiftInterface {
     }
     public void liftUp()
     {
-    	liftDriver.arcadeDrive(0.5, 0.5);
+    	lift1.set(0.5);
     }
     public void liftDown()
     {
-    	liftDriver.arcadeDrive(-0.5, -0.5);
+    	lift1.set(-0.5);
     }
     public void liftStop()
     {
-    	liftDriver.arcadeDrive(0.0, 0.0);
+    	lift1.stop();
     }
     public void liftManualControl()
     {
-    	liftDriver.arcadeDrive(liftStick.getY(), liftStick.getY());
+    	liftStick.getY(lift1.set);
     }
     public double getLiftHeight()
     {
