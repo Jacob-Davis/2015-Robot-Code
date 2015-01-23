@@ -53,18 +53,18 @@ public class Robot extends SampleRobot implements LiftInterface {
 	public static AxisCamera.Resolution k640x360;
 	
 	private final int PORT_FL = 0;
-	private final int PORT_FR = 1;
-	private final int PORT_RL = 2;
+	private final int PORT_RL = 1;
+	private final int PORT_FR = 2;
 	private final int PORT_RR = 3;
 	private final int PORT_LIFT1 = 4;
 	private final int PORT_LIFT2 = 5;
-	private final int PORT_USONIC = 7;
+	private final int PORT_USONIC = 6;
 
-	RobotDrive chassis = new RobotDrive(PORT_FL, PORT_FR, PORT_RL, PORT_RR);
+	RobotDrive chassis = new RobotDrive(PORT_FL, PORT_RL, PORT_FR, PORT_RR);
 	 
 	Talon frontLeft = new Talon(PORT_FL);
-	Talon frontRight = new Talon(PORT_FR);
-	Talon rearLeft = new Talon(PORT_RL);
+	Talon frontRight = new Talon(PORT_RL);
+	Talon rearLeft = new Talon(PORT_FR);
 	Talon rearRight = new Talon(PORT_RR);
 	
 	RobotDrive liftDriver = new RobotDrive(PORT_LIFT1,PORT_LIFT2);
