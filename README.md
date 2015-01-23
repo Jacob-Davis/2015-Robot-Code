@@ -1,18 +1,6 @@
 # Multithreaded-Robot-2015
 
-Jacob, please my messages to you on facebook.
-
-
-
-
-
-
-
-
-
-
-
-
+#Jacob, please read my messages to you on facebook.
 
 A multithreaded version of the Mahwah Robo T-Birds Team 1672 code.
 
