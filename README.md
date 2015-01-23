@@ -1,4 +1,19 @@
 # Multithreaded-Robot-2015
+
+Jacob, please my messages to you on facebook.
+
+
+
+
+
+
+
+
+
+
+
+
+
 A multithreaded version of the Mahwah Robo T-Birds Team 1672 code.
 
 RoboRIO 2015. Hello whoever this may concern.
