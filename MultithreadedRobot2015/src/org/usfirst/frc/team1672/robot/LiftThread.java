@@ -6,10 +6,11 @@ package org.usfirst.frc.team1672.robot;
  * A subclass of Thread that encapsulates the robot's interfacing with the lift.
  */
 public class LiftThread extends Thread {
-	public Robot robot;
-	public LiftThread()
+	private Robot robot;
+	public LiftThread(Robot inputRobot)
 	{
 		super("LiftThread");
+		robot = inputRobot;
 	}
 	public void start()
 	{

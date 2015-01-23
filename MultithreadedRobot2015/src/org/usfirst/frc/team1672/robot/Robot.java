@@ -30,13 +30,8 @@ import edu.wpi.first.wpilibj.Gyro;
  * directory.
  */
 public class Robot extends SampleRobot implements LiftInterface {
-	/*
-	 * I just put ALL of the lift's function into a separate file. This cleans
-	 * up the code a little bit. ~Andrew 1/21/15
-	 */
-	
-	
 	LiftThread lift;
+	DriveThread manualDrive;
 	
 	Joystick driveStick = new Joystick(0);
 	Joystick liftStick = new Joystick(1);
@@ -48,10 +43,14 @@ public class Robot extends SampleRobot implements LiftInterface {
 	SmartDashboard dash = new SmartDashboard();
 	SendableChooser autoChooser = new SendableChooser();
 	String chosenAuto;
-	 
+	
 	AxisCamera cam1 = new AxisCamera("10.16.72.2");
 	public static AxisCamera.Resolution k640x360;
 	
+	
+	/*-------------------------------------------------------------------------------------------*/
+	/*Please, put all PWM ports used here so we never accidentally allocate 1 port more than once*/
+	/*-------------------------------------------------------------------------------------------*/
 	private final int PORT_FL = 0;
 	private final int PORT_FR = 1;
 	private final int PORT_RL = 2;
@@ -59,22 +58,10 @@ public class Robot extends SampleRobot implements LiftInterface {
 	private final int PORT_LIFT1 = 4;
 	private final int PORT_LIFT2 = 5;
 	private final int PORT_USONIC = 7;
-
-	RobotDrive chassis = new RobotDrive(PORT_FL, PORT_FR, PORT_RL, PORT_RR);
-	 
-	Talon frontLeft = new Talon(PORT_FL);
-	Talon frontRight = new Talon(PORT_FR);
-	Talon rearLeft = new Talon(PORT_RL);
-	Talon rearRight = new Talon(PORT_RR);
 	
-	RobotDrive liftDriver = new RobotDrive(PORT_LIFT1,PORT_LIFT2);
-	Jaguar lift1 = new Jaguar(PORT_LIFT1);
-	Jaguar lift2 = new Jaguar(PORT_LIFT2);
-	
-	Ultrasonic liftSensor = new Ultrasonic(PORT_USONIC, PORT_USONIC);
-	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
-	public static double desiredHeight;
-	 
+	/*--------------------------------------------------------------------------*/
+	/* 						Other constants										*/
+	/*--------------------------------------------------------------------------*/
 	public final int BTN_LIFT_ONE = 2;
 	public final int BTN_LIFT_TWO = 3;
 	public final int BTN_LIFT_THREE = 4;
@@ -87,22 +74,37 @@ public class Robot extends SampleRobot implements LiftInterface {
 	public final double THIRD_SENSOR_DISTANCE = 36.3; //3rd level
 	public final double FOURTH_SENSOR_DISTANCE = 48.4; //4th level
 	public final double FIFTH_SENSOR_DISTANCE = 56; //5th level (container)
-	 
+
+	//RobotDrive chassis = new RobotDrive(PORT_FL, PORT_FR, PORT_RL, PORT_RR);
+	//RobotDrive chassis = new RobotDrive(PORT_FL, PORT_RL, PORT_FR, PORT_RR);
+	Talon frontLeft = new Talon(PORT_FL);
+	Talon frontRight = new Talon(PORT_FR);
+	Talon rearLeft = new Talon(PORT_RL);
+	Talon rearRight = new Talon(PORT_RR);
+	RobotDrive chassis = new RobotDrive(frontLeft, frontRight, rearLeft, rearRight);
+	
+	//RobotDrive liftDriver = new RobotDrive(PORT_LIFT1,PORT_LIFT2);
+	Jaguar lift1 = new Jaguar(PORT_LIFT1);
+	Jaguar lift2 = new Jaguar(PORT_LIFT2);
+	RobotDrive liftDriver = new RobotDrive(lift1, lift2);
+	
+	Ultrasonic liftSensor = new Ultrasonic(PORT_USONIC, PORT_USONIC);
+	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
+	public static double desiredHeight;
+	
 	boolean isLiftReady = false;
 	boolean stopLoop = false;
 	boolean inputDetected = false;
 	 
 	public void robotInit() {
-		lift = new LiftThread();
-		lift.robot = this;
-		 
     	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
     	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+    	manualDrive = new DriveThread(this);
     	
 		liftSensor.setAutomaticMode(true);
 		liftSensor.setEnabled(true);
-		
 		liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+		lift = new LiftThread(this);
 		
 		autoChooser.addDefault("Right", "autoRight");
 		autoChooser.addObject("Middle", "autoMiddle");
@@ -138,39 +140,19 @@ public class Robot extends SampleRobot implements LiftInterface {
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl() {
+    	chassis.setSafetyEnabled(true);
 		liftSensor.setAutomaticMode(true);
 		liftSensor.setEnabled(true);
-
-		Thread driveThread = new Thread() {
-			public void start() {
-			}
-			public void run() {
-				while(isOperatorControl() && isEnabled())
-				{
-					chassis.mecanumDrive_Polar(driveStick.getMagnitude(), driveStick.getDirectionDegrees(), driveStick.getTwist());
-
-				}
-				
-			}
-		};
 	
-		driveThread.start();
+		manualDrive.start();
 		lift.start();
-		chassis.setSafetyEnabled(true);
-			
-		
         try
         {
-        	/*
-        	 * Thread.join() makes it so that the main method, which is operatorControl()
+        	/*Thread.join() makes it so that operatorControl()
         	 * continues to run as long as the threads it is joined to are running.
-        	 * This makes a while loop in operatorControl() unnecessary,
-        	 * as long as there are while loops in the joined threads, which I already
-        	 * added.
-        	 * Try and catch are required by java here.
-        	 * ~Andrew, 1/19/2013
-        	 */
-        	driveThread.join();
+        	 * This makes a while loop in operatorControl() unnecessary
+        	 * as long as there are while loops in the joined threads.*/
+        	manualDrive.join();
         	lift.join();
         }
         catch(InterruptedException ie)
@@ -239,11 +221,14 @@ public class Robot extends SampleRobot implements LiftInterface {
     {
     	return liftSensor.getRangeInches();
     }
+    public void driveManualControl()
+    {
+    	chassis.mecanumDrive_Polar(driveStick.getMagnitude(), driveStick.getDirectionDegrees(), driveStick.getTwist());
+    }
     public boolean operatorIsEnabled()
     {
     	return isEnabled() && isOperatorControl();
     }
-   
 }
 
 
