@@ -75,15 +75,12 @@ public class Robot extends SampleRobot implements LiftInterface {
 	public final double FOURTH_SENSOR_DISTANCE = 48.4; //4th level
 	public final double FIFTH_SENSOR_DISTANCE = 56; //5th level (container)
 
-	//RobotDrive chassis = new RobotDrive(PORT_FL, PORT_FR, PORT_RL, PORT_RR);
-	//RobotDrive chassis = new RobotDrive(PORT_FL, PORT_RL, PORT_FR, PORT_RR);
 	Talon frontLeft = new Talon(PORT_FL);
 	Talon frontRight = new Talon(PORT_FR);
 	Talon rearLeft = new Talon(PORT_RL);
 	Talon rearRight = new Talon(PORT_RR);
 	RobotDrive chassis = new RobotDrive(frontLeft, frontRight, rearLeft, rearRight);
 	
-	//RobotDrive liftDriver = new RobotDrive(PORT_LIFT1,PORT_LIFT2);
 	Jaguar lift1 = new Jaguar(PORT_LIFT1);
 	Jaguar lift2 = new Jaguar(PORT_LIFT2);
 	RobotDrive liftDriver = new RobotDrive(lift1, lift2);
@@ -203,19 +200,19 @@ public class Robot extends SampleRobot implements LiftInterface {
     }
     public void liftUp()
     {
-    	lift1.set(0.5);
+    	liftDriver.arcadeDrive(0.5, 0.0);
     }
     public void liftDown()
     {
-    	lift1.set(-0.5);
+    	liftDriver.arcadeDrive(-0.5, 0.0);
     }
     public void liftStop()
     {
-    	lift1.stop();
+    	liftDriver.arcadeDrive(0.0, 0.0);;
     }
     public void liftManualControl()
     {
-    	liftStick.getY(lift1.set);
+    	liftDriver.arcadeDrive(liftStick.getY(), 0.0);
     }
     public double getLiftHeight()
     {
