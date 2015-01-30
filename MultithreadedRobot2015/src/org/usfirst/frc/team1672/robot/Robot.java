@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj.Gyro;
 
 /**
  * The VM is configured to automatically run this class, and to call the
+ * 
+ * 
  * functions corresponding to each mode, as described in the SimpleRobot
  * documentation. If you change the name of this class or the package after
  * creating this project, you must also update the manifest file in the resource
@@ -36,16 +38,16 @@ public class Robot extends SampleRobot implements LiftInterface {
 	Joystick driveStick = new Joystick(0);
 	Joystick liftStick = new Joystick(1);
 	 
-	public static Gyro roboGyro = new Gyro(10);
-	double robotDegrees = roboGyro.getAngle();
+	//public Gyro roboGyro = new Gyro(10);
+	//double robotDegrees;
 	 
 	AutoLibrary autoLib = new AutoLibrary();
 	SmartDashboard dash = new SmartDashboard();
 	SendableChooser autoChooser = new SendableChooser();
 	String chosenAuto;
 	
-	AxisCamera cam1 = new AxisCamera("10.16.72.2");
-	public static AxisCamera.Resolution k640x360;
+	//AxisCamera cam1 = new AxisCamera("10.16.72.2");
+	//public AxisCamera.Resolution k640x360;
 	
 	
 	/*-------------------------------------------------------------------------------------------*/
@@ -57,7 +59,9 @@ public class Robot extends SampleRobot implements LiftInterface {
 	private final int PORT_RR = 3;
 	private final int PORT_LIFT1 = 4;
 	private final int PORT_LIFT2 = 5;
-	private final int PORT_USONIC = 7;
+	//ultrasonic digital channels
+	private final int PORT_USONIC_PING = 5;
+	private final int PORT_USONIC_PONG = 6;
 	
 	/*--------------------------------------------------------------------------*/
 	/* 						Other constants										*/
@@ -85,7 +89,7 @@ public class Robot extends SampleRobot implements LiftInterface {
 	Jaguar lift2 = new Jaguar(PORT_LIFT2);
 	RobotDrive liftDriver = new RobotDrive(lift1, lift2);
 	
-	Ultrasonic liftSensor = new Ultrasonic(PORT_USONIC, PORT_USONIC);
+	Ultrasonic liftSensor = new Ultrasonic(PORT_USONIC_PING, PORT_USONIC_PONG);
 	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
 	public static double desiredHeight;
 	
@@ -94,12 +98,14 @@ public class Robot extends SampleRobot implements LiftInterface {
 	boolean inputDetected = false;
 	 
 	public void robotInit() {
+		
     	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
     	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+    	
     	manualDrive = new DriveThread(this);
     	
-		liftSensor.setAutomaticMode(true);
-		liftSensor.setEnabled(true);
+		//liftSensor.setAutomaticMode(true);
+		//liftSensor.setEnabled(true);
 		liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
 		lift = new LiftThread(this);
 		
@@ -107,9 +113,13 @@ public class Robot extends SampleRobot implements LiftInterface {
 		autoChooser.addObject("Middle", "autoMiddle");
 		autoChooser.addObject("Left", "autoLeft");
 		SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
+		
+		System.out.println("Robot init successful!");
+		
 	 }
 	
     public void autonomous() {
+    	/*
     	chosenAuto = (String) autoChooser.getSelected();
     	chassis.setSafetyEnabled(false);
     	
@@ -131,12 +141,17 @@ public class Robot extends SampleRobot implements LiftInterface {
 	    		break;
 	    	}
     	}
+    	*/
     }//<---end autonomous() method
 
     /**
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl() {
+    	/*
+    	//robotDegrees = roboGyro.getAngle(); //TODO: put this in a sensor thread
+    	
+    	
     	chassis.setSafetyEnabled(true);
 		liftSensor.setAutomaticMode(true);
 		liftSensor.setEnabled(true);
@@ -145,10 +160,10 @@ public class Robot extends SampleRobot implements LiftInterface {
 		lift.start();
         try
         {
-        	/*Thread.join() makes it so that operatorControl()
-        	 * continues to run as long as the threads it is joined to are running.
-        	 * This makes a while loop in operatorControl() unnecessary
-        	 * as long as there are while loops in the joined threads.*/
+        	//Thread.join() makes it so that operatorControl()
+        	// continues to run as long as the threads it is joined to are running.
+        	// This makes a while loop in operatorControl() unnecessary
+        	// as long as there are while loops in the joined threads.
         	manualDrive.join();
         	lift.join();
         }
@@ -156,6 +171,7 @@ public class Robot extends SampleRobot implements LiftInterface {
         {
         	System.err.println("Failure joining threads due to InterruptedException!");
         }
+       */
 	}
 										
   /**
