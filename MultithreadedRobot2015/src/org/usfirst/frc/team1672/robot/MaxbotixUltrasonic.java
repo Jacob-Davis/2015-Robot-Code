@@ -7,7 +7,8 @@ import edu.wpi.first.wpilibj.AnalogInput;
 /**
  * MaxbotixUltrasonic
  * 
- * Custom class to talk to the Maxbotix Ultrasonic that came with the 2012 kit.
+ * Custom class to talk to the Maxbotix Ultrasonic that came with the 2012 kit, because it doesn't
+ * work with the Ultrasonic class in the WPILib.
  */
 public class MaxbotixUltrasonic extends SensorBase {
 	

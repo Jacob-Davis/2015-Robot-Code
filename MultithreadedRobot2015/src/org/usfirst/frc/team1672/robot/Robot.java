@@ -60,8 +60,7 @@ public class Robot extends SampleRobot implements LiftInterface {
 	private final int PORT_LIFT1 = 4;
 	private final int PORT_LIFT2 = 5;
 	//ultrasonic digital channels
-	private final int PORT_USONIC_PING = 5;
-	private final int PORT_USONIC_PONG = 6;
+	private final int PORT_USONIC = 7;
 	
 	/*--------------------------------------------------------------------------*/
 	/* 						Other constants										*/
@@ -89,7 +88,7 @@ public class Robot extends SampleRobot implements LiftInterface {
 	Jaguar lift2 = new Jaguar(PORT_LIFT2);
 	RobotDrive liftDriver = new RobotDrive(lift1, lift2);
 	
-	Ultrasonic liftSensor = new Ultrasonic(PORT_USONIC_PING, PORT_USONIC_PONG);
+	MaxbotixUltrasonic liftSensor = new MaxbotixUltrasonic(PORT_USONIC);
 	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
 	public static double desiredHeight;
 	
@@ -119,7 +118,7 @@ public class Robot extends SampleRobot implements LiftInterface {
 	 }
 	
     public void autonomous() {
-    	/*
+    	
     	chosenAuto = (String) autoChooser.getSelected();
     	chassis.setSafetyEnabled(false);
     	
@@ -141,20 +140,20 @@ public class Robot extends SampleRobot implements LiftInterface {
 	    		break;
 	    	}
     	}
-    	*/
+    	
     }//<---end autonomous() method
 
     /**
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl() {
-    	/*
+    	
     	//robotDegrees = roboGyro.getAngle(); //TODO: put this in a sensor thread
     	
     	
     	chassis.setSafetyEnabled(true);
-		liftSensor.setAutomaticMode(true);
-		liftSensor.setEnabled(true);
+		//liftSensor.setAutomaticMode(true);
+		//liftSensor.setEnabled(true);
 	
 		manualDrive.start();
 		lift.start();
@@ -171,7 +170,7 @@ public class Robot extends SampleRobot implements LiftInterface {
         {
         	System.err.println("Failure joining threads due to InterruptedException!");
         }
-       */
+       
 	}
 										
   /**
