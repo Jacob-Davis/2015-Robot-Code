@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj.Gyro;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class Robot extends SampleRobot implements LiftInterface {
+public class Robot extends SampleRobot implements Master {
 	LiftThread lift;
 	DriveThread manualDrive;
 	
@@ -82,23 +82,23 @@ public class Robot extends SampleRobot implements LiftInterface {
 	Talon frontRight = new Talon(PORT_FR);
 	Talon rearLeft = new Talon(PORT_RL);
 	Talon rearRight = new Talon(PORT_RR);
-	RobotDrive chassis = new RobotDrive(frontLeft, frontRight, rearLeft, rearRight);
+	RobotDrive chassis = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 	
 	Jaguar lift1 = new Jaguar(PORT_LIFT1);
 	Jaguar lift2 = new Jaguar(PORT_LIFT2);
 	RobotDrive liftDriver = new RobotDrive(lift1, lift2);
 	
 	MaxbotixUltrasonic liftSensor = new MaxbotixUltrasonic(PORT_USONIC);
-	public static double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
-	public static double desiredHeight;
+	public double liftHeight; //in inches | totes = 12.1 in, containers = 29 in
+	public double desiredHeight;
 	
 	boolean isLiftReady = false;
 	boolean stopLoop = false;
 	boolean inputDetected = false;
-	 
-	public void robotInit() {
-		
-    	chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+	
+	public Robot()
+	{
+		chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
     	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
     	
     	manualDrive = new DriveThread(this);
@@ -106,16 +106,20 @@ public class Robot extends SampleRobot implements LiftInterface {
 		//liftSensor.setAutomaticMode(true);
 		//liftSensor.setEnabled(true);
 		liftDriver.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-		lift = new LiftThread(this);
+		lift = new LiftThread(lift1, lift2);
+		lift.setMaster(this);
+		lift.setJoystick(liftStick);
+		lift.setUltrasonic(liftSensor);
 		
 		autoChooser.addDefault("Right", "autoRight");
 		autoChooser.addObject("Middle", "autoMiddle");
 		autoChooser.addObject("Left", "autoLeft");
 		SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
 		
-		System.out.println("Robot init successful!");
-		
-	 }
+		System.out.println("Robot construction successful!");
+	}
+	 
+	public void robotInit() {}
 	
     public void autonomous() {
     	
@@ -185,54 +189,6 @@ public class Robot extends SampleRobot implements LiftInterface {
 	}
     
     //----------interface methods---------------------------------//
-    public double getInputHeight()
-    {
-    	if(liftStick.getTrigger())
-		{
-			desiredHeight = GROUND_SENSOR_DISTANCE;
-		}
-		if(liftStick.getRawButton(BTN_LIFT_ONE))
-		{
-			desiredHeight = FIRST_SENSOR_DISTANCE;
-		}
-		if(liftStick.getRawButton(BTN_LIFT_TWO))
-		{
-			desiredHeight = SECOND_SENSOR_DISTANCE;
-		}
-		if(liftStick.getRawButton(BTN_LIFT_THREE))
-		{
-			desiredHeight = THIRD_SENSOR_DISTANCE;
-		}
-		if(liftStick.getRawButton(BTN_LIFT_FOUR))
-		{
-			desiredHeight = FOURTH_SENSOR_DISTANCE;
-		}
-		if(liftStick.getRawButton(BTN_LIFT_FIVE))
-		{
-			desiredHeight = FIFTH_SENSOR_DISTANCE;
-		}
-    	return desiredHeight;
-    }
-    public void liftUp()
-    {
-    	liftDriver.arcadeDrive(0.5, 0.0);
-    }
-    public void liftDown()
-    {
-    	liftDriver.arcadeDrive(-0.5, 0.0);
-    }
-    public void liftStop()
-    {
-    	liftDriver.arcadeDrive(0.0, 0.0);;
-    }
-    public void liftManualControl()
-    {
-    	liftDriver.arcadeDrive(liftStick.getY(), 0.0);
-    }
-    public double getLiftHeight()
-    {
-    	return liftSensor.getRangeInches();
-    }
     public void driveManualControl()
     {
     	chassis.mecanumDrive_Polar(driveStick.getMagnitude(), driveStick.getDirectionDegrees(), driveStick.getTwist());
