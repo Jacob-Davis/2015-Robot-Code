@@ -101,7 +101,7 @@ public class Robot extends SampleRobot implements Master {
 		chassis.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
     	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
     	
-    	manualDrive = new DriveThread(this);
+    	manualDrive = new DriveThread(chassis);
     	
 		//liftSensor.setAutomaticMode(true);
 		//liftSensor.setEnabled(true);
@@ -155,11 +155,12 @@ public class Robot extends SampleRobot implements Master {
     	//robotDegrees = roboGyro.getAngle(); //TODO: put this in a sensor thread
     	
     	
-    	chassis.setSafetyEnabled(true);
+    	chassis.setSafetyEnabled(false);
 		//liftSensor.setAutomaticMode(true);
 		//liftSensor.setEnabled(true);
 	
-		manualDrive.start();
+		//manualDrive.start();
+    	System.out.println("OPERATOR CONTROL STARTED--------------------------");
 		lift.start();
         try
         {
@@ -167,7 +168,7 @@ public class Robot extends SampleRobot implements Master {
         	// continues to run as long as the threads it is joined to are running.
         	// This makes a while loop in operatorControl() unnecessary
         	// as long as there are while loops in the joined threads.
-        	manualDrive.join();
+        	//manualDrive.join();
         	lift.join();
         }
         catch(InterruptedException ie)
@@ -193,9 +194,13 @@ public class Robot extends SampleRobot implements Master {
     {
     	chassis.mecanumDrive_Polar(driveStick.getMagnitude(), driveStick.getDirectionDegrees(), driveStick.getTwist());
     }
-    public boolean operatorIsEnabled()
+    public boolean operatorEnabled()
     {
     	return isEnabled() && isOperatorControl();
+    }
+    public boolean isAutonomousControl()
+    {
+    	return isEnabled() && isAutonomous();
     }
 }
 

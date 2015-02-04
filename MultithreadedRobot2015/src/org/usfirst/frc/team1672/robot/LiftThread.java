@@ -36,6 +36,7 @@ public class LiftThread extends Thread {
 	{
 		super("LiftThread"); //create the thread and name it "LiftThread"
 		liftDrive = new RobotDrive(motor1, motor2);
+		liftDrive.setSafetyEnabled(false);
 		manualEnabled = false;
 		inputStick = null;
 		liftSensor = null;
@@ -60,23 +61,35 @@ public class LiftThread extends Thread {
 	}
 	public void run()
 	{
-		while(master.isEnabled())
+		System.out.println("lift thread run started");
+		if(master != null)
 		{
-			desiredHeight = getInputHeight();
-			liftHeight = getLiftHeight();
-			if(liftHeight < desiredHeight)
+			while(master.operatorEnabled())
 			{
-				liftDrive.arcadeDrive(0.5, 0.0);
+				System.out.println("sjabfaub");
+				desiredHeight = getInputHeight();
+				liftHeight = getLiftHeight();
+				if(liftHeight != -1.0)
+				{
+					//if the ultrasonic exists and is returning an accurate liftHeight
+					//make the lift go to the desired height
+					if(liftHeight < desiredHeight)
+					{
+						liftDrive.arcadeDrive(0.5, 0.0);
+					}
+					if(liftHeight > desiredHeight)
+					{
+						liftDrive.arcadeDrive(-0.5, 0.0);
+					}
+					if(liftHeight == desiredHeight)
+					{
+						liftDrive.arcadeDrive(0.0, 0.0);
+					}
+				}
+				System.out.println("Joystick Y:" + inputStick.getY());
+				//if the ultrasonic does not exist, button control is disabled
+				liftDrive.arcadeDrive(inputStick.getY(), 0.0);
 			}
-			if(liftHeight > desiredHeight)
-			{
-				liftDrive.arcadeDrive(-0.5, 0.0);
-			}
-			if(liftHeight == desiredHeight)
-			{
-				liftDrive.arcadeDrive(0.0, 0.0);
-			}
-			liftDrive.arcadeDrive(inputStick.getY(), 0.0);
 		}
 	}
 	private double getLiftHeight()
@@ -85,7 +98,7 @@ public class LiftThread extends Thread {
 		{
 			return liftSensor.getRangeInches();
 		}
-    	return 0.0;
+    	return -1.0;
     }
 	private double getInputHeight()
     {
@@ -93,11 +106,11 @@ public class LiftThread extends Thread {
 		{
 	    	if(inputStick.getTrigger())
 			{
-				desiredHeight = GROUND_SENSOR_DISTANCE;
+				desiredHeight = getLiftHeight(); //lock the lift height
 			}
 			if(inputStick.getRawButton(BTN_LIFT_ONE))
 			{
-				desiredHeight = FIRST_SENSOR_DISTANCE;
+				desiredHeight = GROUND_SENSOR_DISTANCE;
 			}
 			if(inputStick.getRawButton(BTN_LIFT_TWO))
 			{
