@@ -60,7 +60,7 @@ public class Robot extends SampleRobot implements Master {
 	private final int PORT_LIFT1 = 4;
 	private final int PORT_LIFT2 = 5;
 	//ultrasonic digital channels
-	private final int PORT_USONIC = 7;
+	private final int PORT_USONIC = 1;
 	
 	/*--------------------------------------------------------------------------*/
 	/* 						Other constants										*/
@@ -161,7 +161,10 @@ public class Robot extends SampleRobot implements Master {
 	
 		//manualDrive.start();
     	System.out.println("OPERATOR CONTROL STARTED--------------------------");
-		lift.start();
+    	System.out.println("Robot ma:" + this);
+		Thread liftThread = new Thread(lift);
+		Thread driveThread = new Thread(manualDrive);
+		liftThread.start();
         try
         {
         	//Thread.join() makes it so that operatorControl()
@@ -169,7 +172,7 @@ public class Robot extends SampleRobot implements Master {
         	// This makes a while loop in operatorControl() unnecessary
         	// as long as there are while loops in the joined threads.
         	//manualDrive.join();
-        	lift.join();
+        	liftThread.join();
         }
         catch(InterruptedException ie)
         {
@@ -185,7 +188,7 @@ public class Robot extends SampleRobot implements Master {
 		double testHeight;
 		while (isTest() && isEnabled()) {
 			testHeight = liftSensor.getRangeInches();
-			System.out.println(testHeight + " inches");
+			System.out.println(testHeight + " inches" + "|| voltage:" + liftSensor.getVoltage());
 		}
 	}
     

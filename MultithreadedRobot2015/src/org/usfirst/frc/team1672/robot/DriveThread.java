@@ -3,7 +3,7 @@ package org.usfirst.frc.team1672.robot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
 
-public class DriveThread extends Thread {
+public class DriveThread implements Runnable {
 	private RobotDrive drive;
 	private Joystick inputStick;
 	private Master master;
@@ -11,8 +11,8 @@ public class DriveThread extends Thread {
 	private double rotSensitivity; //the sensitivity of rotation
 	public DriveThread(RobotDrive inputRobotDrive)
 	{
-		super("DriveThread");
 		drive = inputRobotDrive;
+		drive.setSafetyEnabled(false);
 		master = null;
 		inputStick = null;
 		snapAngle = 0.0;

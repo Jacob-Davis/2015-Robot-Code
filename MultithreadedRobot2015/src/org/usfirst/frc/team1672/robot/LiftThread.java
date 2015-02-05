@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Joystick;
  * class LiftThread:
  * A subclass of Thread that encapsulates the robot's interfacing with the lift.
  */
-public class LiftThread extends Thread {
+public class LiftThread implements Runnable {
 	private RobotDrive liftDrive;
 	private boolean manualEnabled;
 	private Joystick inputStick;
@@ -34,7 +34,6 @@ public class LiftThread extends Thread {
 	
 	public LiftThread(Jaguar motor1, Jaguar motor2)
 	{
-		super("LiftThread"); //create the thread and name it "LiftThread"
 		liftDrive = new RobotDrive(motor1, motor2);
 		liftDrive.setSafetyEnabled(false);
 		manualEnabled = false;
@@ -57,7 +56,8 @@ public class LiftThread extends Thread {
 	}
 	public void start()
 	{
-		
+		System.out.println("LIFT STARTED>>>>>>>>>>>>>>>>>>>>>");
+		System.out.println("Master:" + master);
 	}
 	public void run()
 	{

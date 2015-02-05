@@ -35,14 +35,23 @@ public class MaxbotixUltrasonic extends SensorBase {
     	minDistance = 3.0;
     	distanceRange = 60.0 - minDistance;
     }
+    
+    /*
+     * 
+     * Get the APPROXIMATe amount of inches
+     */
     public double getRangeInches()
     {
-    	double range = inChannel.getVoltage();
+    	double range = inChannel.getValue();
     	//normalize voltage
     	//in other words, make sure voltage doesn't include the voltage sensed if nothing was in front of the sensor
-    	range = (range - minVoltage)/voltageRange;
-    	//denormalize to unit range
+    	range = (range - 80.0);
+    	//convert to inches
     	range = (range * distanceRange) + minDistance;
     	return range;
+    }
+    public double getVoltage()
+    {
+    	return inChannel.getValue();
     }
 }
