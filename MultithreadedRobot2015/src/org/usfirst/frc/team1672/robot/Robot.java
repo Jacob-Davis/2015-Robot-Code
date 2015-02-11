@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.vision.AxisCamera;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.CameraServer;
 
 //import edu.wpi.first.wpilibj.buttons.JoystickButton; Not needed (using raw input)
 
@@ -45,6 +46,7 @@ public class Robot extends SampleRobot implements Master {
 	SmartDashboard dash = new SmartDashboard();
 	SendableChooser autoChooser = new SendableChooser();
 	String chosenAuto;
+	CameraServer usbCam;
 	
 	//AxisCamera cam1 = new AxisCamera("10.16.72.2");
 	//public AxisCamera.Resolution k640x360;
@@ -102,6 +104,7 @@ public class Robot extends SampleRobot implements Master {
     	chassis.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
     	
     	manualDrive = new DriveThread(chassis);
+    	manualDrive.setSnapAngle(15.0);
     	
 		//liftSensor.setAutomaticMode(true);
 		//liftSensor.setEnabled(true);
@@ -117,6 +120,10 @@ public class Robot extends SampleRobot implements Master {
 		SmartDashboard.putData("Autonomous Code Chooser", autoChooser);
 		
 		System.out.println("Robot construction successful!");
+		
+		usbCam = CameraServer.getInstance();
+		usbCam.setQuality(80); //80% quality
+		usbCam.startAutomaticCapture("cam1");
 	}
 	 
 	public void robotInit() {}
@@ -151,26 +158,21 @@ public class Robot extends SampleRobot implements Master {
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl() {
-    	
     	//robotDegrees = roboGyro.getAngle(); //TODO: put this in a sensor thread
-    	
     	
     	chassis.setSafetyEnabled(false);
 		//liftSensor.setAutomaticMode(true);
 		//liftSensor.setEnabled(true);
 	
-		//manualDrive.start();
     	System.out.println("OPERATOR CONTROL STARTED--------------------------");
-    	System.out.println("Robot ma:" + this);
 		Thread liftThread = new Thread(lift);
-		Thread driveThread = new Thread(manualDrive);
+		//Thread driveThread = new Thread(manualDrive);
 		liftThread.start();
         try
         {
         	//Thread.join() makes it so that operatorControl()
         	// continues to run as long as the threads it is joined to are running.
-        	// This makes a while loop in operatorControl() unnecessary
-        	// as long as there are while loops in the joined threads.
+        	
         	//manualDrive.join();
         	liftThread.join();
         }
@@ -189,6 +191,7 @@ public class Robot extends SampleRobot implements Master {
 		while (isTest() && isEnabled()) {
 			testHeight = liftSensor.getRangeInches();
 			System.out.println(testHeight + " inches" + "|| voltage:" + liftSensor.getVoltage());
+			lift1.set(liftStick.getY());
 		}
 	}
     
@@ -201,7 +204,7 @@ public class Robot extends SampleRobot implements Master {
     {
     	return isEnabled() && isOperatorControl();
     }
-    public boolean isAutonomousControl()
+    public boolean autonomousEnabled()
     {
     	return isEnabled() && isAutonomous();
     }

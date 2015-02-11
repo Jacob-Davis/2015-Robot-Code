@@ -57,19 +57,20 @@ public class LiftThread implements Runnable {
 	public void start()
 	{
 		System.out.println("LIFT STARTED>>>>>>>>>>>>>>>>>>>>>");
-		System.out.println("Master:" + master);
+		//System.out.println("Master:" + master);
 	}
 	public void run()
 	{
+		boolean stickMoving = false;
 		System.out.println("lift thread run started");
 		if(master != null)
 		{
 			while(master.operatorEnabled())
 			{
-				System.out.println("sjabfaub");
+				//System.out.println("sjabfaub");
 				desiredHeight = getInputHeight();
 				liftHeight = getLiftHeight();
-				if(liftHeight != -1.0)
+				if(liftHeight != -1.0 && !stickMoving)
 				{
 					//if the ultrasonic exists and is returning an accurate liftHeight
 					//make the lift go to the desired height
@@ -88,7 +89,15 @@ public class LiftThread implements Runnable {
 				}
 				System.out.println("Joystick Y:" + inputStick.getY());
 				//if the ultrasonic does not exist, button control is disabled
-				liftDrive.arcadeDrive(inputStick.getY(), 0.0);
+				if(Math.abs(inputStick.getY()) > 0.05)
+				{
+					stickMoving = true;
+					liftDrive.arcadeDrive(inputStick.getY(), 0.0);
+				}
+				else
+				{
+					stickMoving = false;
+				}
 			}
 		}
 	}

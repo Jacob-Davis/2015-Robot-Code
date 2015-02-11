@@ -52,6 +52,6 @@ public class MaxbotixUltrasonic extends SensorBase {
     }
     public double getVoltage()
     {
-    	return inChannel.getValue();
+    	return inChannel.getVoltage();
     }
 }
