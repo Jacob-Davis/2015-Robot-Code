@@ -31,7 +31,10 @@ public class Diagnostics implements Runnable {
 			{
 				if(display != null)
 				{
-					
+					SmartDashboard.putNumber("Y-Axis", accel.getY());
+		    		SmartDashboard.putNumber("X-Axis", accel.getX());
+		    		SmartDashboard.putNumber("Z-Axis", accel.getZ());
+		    		//SmartDashboard.putNumber("Lift Height", liftHeight);
 				}
 			}
 		}

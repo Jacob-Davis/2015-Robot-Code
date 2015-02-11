@@ -7,6 +7,7 @@
 
 package org.usfirst.frc.team1672.robot;
 
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.vision.AxisCamera;
+import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.Gyro;
@@ -33,16 +35,14 @@ import edu.wpi.first.wpilibj.CameraServer;
  * directory.
  */
 public class Robot extends SampleRobot implements Master {
+	Accelerometer accel = new BuiltInAccelerometer(Accelerometer.Range.k4G); 
 	LiftThread lift;
 	DriveThread manualDrive;
 	
 	Joystick driveStick = new Joystick(0);
 	Joystick liftStick = new Joystick(1);
 	 
-	//public Gyro roboGyro = new Gyro(10);
-	//double robotDegrees;
-	 
-	AutoLibrary autoLib = new AutoLibrary();
+	AutoLibrary autoLib;
 	SmartDashboard dash = new SmartDashboard();
 	SendableChooser autoChooser = new SendableChooser();
 	String chosenAuto;
@@ -61,7 +61,7 @@ public class Robot extends SampleRobot implements Master {
 	private final int PORT_RR = 3;
 	private final int PORT_LIFT1 = 4;
 	private final int PORT_LIFT2 = 5;
-	//ultrasonic digital channels
+	//ultrasonic analog channels, separate from PWM ports
 	private final int PORT_USONIC = 1;
 	
 	/*--------------------------------------------------------------------------*/
@@ -114,6 +114,8 @@ public class Robot extends SampleRobot implements Master {
 		lift.setJoystick(liftStick);
 		lift.setUltrasonic(liftSensor);
 		
+		autoLib = new AutoLibrary(chassis, liftDriver, PORT_USONIC);
+		
 		autoChooser.addDefault("Right", "autoRight");
 		autoChooser.addObject("Middle", "autoMiddle");
 		autoChooser.addObject("Left", "autoLeft");
@@ -122,7 +124,7 @@ public class Robot extends SampleRobot implements Master {
 		System.out.println("Robot construction successful!");
 		
 		usbCam = CameraServer.getInstance();
-		usbCam.setQuality(80); //80% quality
+		usbCam.setQuality(100); 
 		usbCam.startAutomaticCapture("cam1");
 	}
 	 
@@ -167,7 +169,9 @@ public class Robot extends SampleRobot implements Master {
     	System.out.println("OPERATOR CONTROL STARTED--------------------------");
 		Thread liftThread = new Thread(lift);
 		//Thread driveThread = new Thread(manualDrive);
+		Thread diagnostics = new Thread(new Diagnostics(accel));
 		liftThread.start();
+		diagnostics.start();
         try
         {
         	//Thread.join() makes it so that operatorControl()
@@ -175,6 +179,7 @@ public class Robot extends SampleRobot implements Master {
         	
         	//manualDrive.join();
         	liftThread.join();
+        	diagnostics.join();
         }
         catch(InterruptedException ie)
         {
@@ -190,8 +195,17 @@ public class Robot extends SampleRobot implements Master {
 		double testHeight;
 		while (isTest() && isEnabled()) {
 			testHeight = liftSensor.getRangeInches();
-			System.out.println(testHeight + " inches" + "|| voltage:" + liftSensor.getVoltage());
+			System.out.print(testHeight + " inches\t" + "voltage:" + liftSensor.getVoltage());
 			lift1.set(liftStick.getY());
+			//liftDriver.arcadeDrive(liftStick.getY(), 0.0);
+			for(int i = 1; i <= 11; i++)
+			{
+				if(liftStick.getRawButton(i))
+				{
+					System.out.print("\tbutton" + i + "pressed\t");
+				}
+			}
+			System.out.print("throttle:" + liftStick.getThrottle() + "\n");
 		}
 	}
     

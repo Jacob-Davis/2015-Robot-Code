@@ -3,12 +3,16 @@ package org.usfirst.frc.team1672.robot;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 
 /*
  * class LiftThread:
  * A subclass of Thread that encapsulates the robot's interfacing with the lift.
  */
 public class LiftThread implements Runnable {
+	private AutoLibrary auto;
+	
+	
 	private RobotDrive liftDrive;
 	private boolean manualEnabled;
 	private Joystick inputStick;
@@ -50,9 +54,17 @@ public class LiftThread implements Runnable {
 	{
 		liftSensor = u;
 	}
+	/**
+	 * Set the master operator. If this is not set the lift will run in preprogrammed autonomous routines only.
+	 * @param m
+	 */
 	public void setMaster(Master m)
 	{
 		master = m;
+	}
+	public void setAuto(AutoLibrary a)
+	{
+		auto = a;
 	}
 	public void start()
 	{
@@ -100,6 +112,30 @@ public class LiftThread implements Runnable {
 				}
 			}
 		}
+		else //no master set ===> autonomous mode
+		{
+			double currTime = Timer.getFPGATimestamp();
+			double totalTime = 0.0;
+			while(totalTime < 15.0) //total autonomous time is 15 seconds
+			{
+				double liftHeight = liftSensor.getRangeInches();
+				if(liftHeight < auto.s_desiredLiftHeight)
+				{
+					liftDrive.arcadeDrive(0.5, 0.0);
+				}
+				if(liftHeight > auto.s_desiredLiftHeight)
+				{
+					liftDrive.arcadeDrive(-0.5, 0.0);
+				}
+				if(liftHeight == auto.s_desiredLiftHeight)
+				{
+					liftDrive.arcadeDrive(0.0, 0.0);
+				}
+				
+				currTime = Timer.getFPGATimestamp() - currTime;
+				totalTime += currTime;
+			}
+		}
 	}
 	private double getLiftHeight()
     {
@@ -140,4 +176,24 @@ public class LiftThread implements Runnable {
 		}
     	return desiredHeight;
     }
+	public void liftToHeight(double height)
+	{
+		while(true)
+		{
+			double liftHeight = liftSensor.getRangeInches();
+			if(liftHeight < desiredHeight)
+			{
+				liftDrive.arcadeDrive(0.5, 0.0);
+			}
+			if(liftHeight > desiredHeight)
+			{
+				liftDrive.arcadeDrive(-0.5, 0.0);
+			}
+			if(liftHeight == desiredHeight)
+			{
+				liftDrive.arcadeDrive(0.3, 0.0);
+				break;
+			}
+		}
+	}
 }

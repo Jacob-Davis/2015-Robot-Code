@@ -18,7 +18,7 @@ public class DriveThread implements Runnable {
 		master = null;
 		inputStick = null;
 		snapAngle = 0.0;
-		rotSensitivity = 0.5;
+		rotSensitivity = 0.25;
 		strafeSensitivity = 0.5;
 		allowSensitivityThrottle = false;
 	}
@@ -50,12 +50,24 @@ public class DriveThread implements Runnable {
 			rotSensitivity = sensitivity;
 		}
 	}
+	/**
+	 * Set the sensitivity of using the joystick to move the robot forwards/backwards and side-to-side.
+	 */
 	public void setStrafeSensitivity(double sensitivity)
 	{
 		if(sensitivity > 0.0 && sensitivity <= 1.0)
 		{
 			strafeSensitivity = sensitivity;
 		}
+	}
+	/**
+	 * Allow the driver to set the sensitivity of the drive-joystick ingame using the slider/knob/throttle-wheel at the base
+	 * of the joystick.
+	 * @param throttleCanSetSensitivity
+	 */
+	public void setAllowSensitivityThrottle(boolean throttleCanSetSensitivity)
+	{
+		allowSensitivityThrottle = throttleCanSetSensitivity;
 	}
 	public void start() 
 	{
@@ -71,14 +83,22 @@ public class DriveThread implements Runnable {
 				if(inputStick != null)
 				{
 					drive.mecanumDrive_Polar(
-							inputStick.getMagnitude(), 
+							getModifiedMagnitude(), 
 							getSnappedAngle(), 
-							inputStick.getTwist()
+							getModifiedTwist()
 							);
 									
 				}
 			}
 		}
+	}
+	private double getModifiedMagnitude()
+	{
+		if(allowSensitivityThrottle)
+		{
+			return inputStick.getMagnitude() * inputStick.getThrottle();
+		}
+		return inputStick.getMagnitude() * strafeSensitivity;
 	}
 	private double getModifiedTwist()
 	{
